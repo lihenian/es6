@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        /**
+        * 1、字符的Unicode 表示法
+        * JavaScript允许采用\xxxx形式表示一个字符，其中xxxx表示字符的Unicode码点
+        */
+       console.log("\u0061"); // a
+       /**
+        * 但是，这种表示方法只限于码点在\u0000~\uFFFF之间的字符，超出这个范围的字符，
+        * 必须用两个双字节的形式表示。
+       */
+      console.log("\uD842\uDFB7");
+      console.log("\u20BB7");
+      /**
+       * 上面代码表示，如果直接在\u后面跟上超过0xFFFF的数值，比如\u20BB7
+       * javascript会理解成\u20BB+7。由于\u20BB是一个不可打印字符，所以只会显示
+       * 一个空格，后面跟着一个7.
+       * ES6对这一点做出了改进，只要将码点放入大括号，就能正确解读该字符
+      */
+     {
+         console.log("\u{20BB7}");
+         console.log("\u{41}\u{42}\u{43}");
+         let hello = 123;
+         console.log("hell\u{6F}");
+         console.log('\u{1F680}' === '\uD83D\uDE80');
+     }
+     /**
+      * 上面代码中，最后一个例子表明，大括号表示法与四字节UTF-16编码是等价的。
+      * 有了这种表示方法之后，javascript共有6种方法可以表示一个字符
+     */
+    {
+        console.log('\z' === 'z');
+        console.log('\172' === 'z');
+        console.log('\x7A' === 'z');
+        console.log('\u007A' === 'z');
+        console.log('\u{7A}' === 'z');
+    }
+    </script>
+
+    <script>
+        /**
+         * 2、codePointAt()
+         * JavaScript 内部，字符以UTF-16的格式存储，每个字符固定2个字节，对于那些
+         * 需要4个字节存储的字符(Unicode码点大于0xFFFF的字符)，JavaScript会认为
+         * 他们是两个字节
+        */
+       {
+           let s = "𠮷";
+           console.log(s.length);
+           console.log(s.charAt(0));
+           console.log(s.charAt(1));
+           console.log(s.charCodeAt(0));
+           console.log(s.charCodeAt(1));
+       }
+       /**
+        * 上面代码中，汉字“𠮷”（注意，这个字不是吉祥的吉）的码点是0x20BB7,UTF-16编码
+        * 为0xD842 0xDFB7 (十进制为 55362 57271)，需要四个字节存储。对于这种4个字节的
+        * 字符，JavaScript不能正确处理，字符串长度会误判为2，而且charAt方法无法读取整个字符串
+        * charCodeAt方法只能分别返回前两个字节和后两个字节的值。       
+        * 
+        * ES6提供了codePointAt方法，能够正确处理4个字节存储的字符，返回一个字符的码点
+        */
+       {
+           let s = "𠮷a";
+           console.log(s.length);
+           console.log(s.codePointAt(0));
+           console.log(s.codePointAt(1));
+           console.log(s.codePointAt(2));
+       }
+       /**
+        * codePointAt方法的参数，是字符在字符串中的位置（从0开始）。上面代码中，
+        * JavaScript将“𠮷a”视为三个字符，codePointAt方法在第一个字符上，正确的识别了，
+        * 返回了他的十进制码点134071.在第二个字符和第三个字符上，codePointAt方法的结果与
+        * charCodeAt方法相同
+        * 
+        * 总之，codePointAt方法会正确返回32位的UTF-16字符的码点。对于那些两个两个字节存储
+        * 的常规字符，他的返回结果与charCodeAt方法相同
+        * 
+        * codePointAt 方法返回的是码点的十进制值，如果想要十六进制的值，可以使用toString
+        * 方法转换一下
+       */
+      {
+          let s = "𠮷a";
+          console.log(s.codePointAt(0).toString(16));
+          console.log(s.codePointAt(2).toString(16));
+      }
+      /**
+       * 你可能注意到了，codePointAt方法的参数，仍然是不正确的，比如，上面代码中，字符a
+       * 在字符串s的正确位置序号应该是1，但是必须向codePointAt方法传入2.解决这个问题的
+       * 一个方法是使用for...of循环，因为他会正确识别32位的UTF-16字符。
+       * 
+      */
+     {
+         let s = '𠮷a';
+         for (let ch of s) {
+             console.log(ch.codePointAt(0).toString(16));
+         }
+     }
+     /**
+      * codePointAt方法是测试一个字符由两个字节还是由四个字节组成的最简单的方法。
+     */
+    {
+        function is32Bit(c) {
+            return c.codePointAt(0) > 0xFFFF;
+        }
+
+        console.log(is32Bit("𠮷"));
+        console.log(is32Bit("a"));
+    }
+    </script>
+
+    <script>
+        /**
+         * 3、String.fromCodePoint()
+         * ES5提供String.fromCharCode方法，用于从码点返回对应的字符，但是这个方法不能识别
+         * 32位的UTF-16的字符。（Unicode 编号大于0xFFFF）
+        */
+       {
+           console.log(String.fromCharCode(0x20BB7));
+       }
+       /**
+        * 上面代码中，String.fromCharCode不能识别大于0xFFFF的码点，所以0x20BB7就发生了溢出
+        * 最高位2被舍弃了，最后返回了码点U+0BB7对应的字符，而不是码点U+20BB7对应的字符
+        * 
+        * ES6提供了String.fromCodePoint方法，可以识别大于0xFFFF的字符，弥补了String.fromCharCode
+        * 方法的不足。在作用上，正好与codePointAt方法相反
+       */
+      {
+          console.log(String.fromCodePoint(0x20BB7));
+          console.log(String.fromCodePoint(0x78,0x1f680,0x79));
+          console.log('x\uD83D\uDE80y');
+      }
+      /**
+       * 注意：
+       *  fromCodePoint方法定义在String对象上，而codePointAt方法定义在字符串
+       *  实例对象上。
+      */
+    </script>
+
+    <script>
+        /**
+         * 4、字符串的遍历接口
+         *  ES6为字符串添加了遍历器接口，使得字符串可以被for...of循环遍历
+        */
+       {
+           for (let codePoint of 'foo') {
+               console.log(codePoint);
+           }
+       }
+       /**
+        * 除了遍历字符串，这个便利器最大的优点是可以识别大于0xFFFF的码点，传统的
+        * 循环无法识别这样的码点。
+       */
+      {
+          let text = String.fromCodePoint(0x20BB7);
+
+          for (let i = 0; i < text.length; i ++) {
+              console.log(text[i]);
+          }
+          for (let code of text) {
+              console.log(code);
+          }
+      }
+    </script>
+</body>
+</html>
