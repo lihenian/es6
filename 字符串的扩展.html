@@ -268,6 +268,80 @@
             str.endsWith('Hello',6);
             str.includes('Hello',6);
         }
+        /**
+        * 上面代码表示，使用第二个参数n时，endsWith的行为与其他两个方法有所不同。他针对
+        * 前n个字符，而其他两个方法针对第n个位置直到字符串结束。
+        */
+    </script>
+
+    <script>
+        /**
+        * 8、repeat()
+        * report 方法返回一个新字符串，表示将原字符串重复n次。
+        */
+        {
+            console.log('x'.repeat(3));
+            console.log('hello'.repeat(2));
+            console.log('na'.repeat(0));
+        }
+        // 参数如果是小数，会被取整
+        {
+            console.log('na'.repeat(2.9));
+        }
+        // 如果repeat的参数是负数或者Infinity,会报错。
+        {
+           // console.log('na'.repeat(Infinity));
+           // console.log('na'.repeat(-1));
+        }
+        /**
+        * 但是，如果参数是0 到 -1之间的小数，则等同于0，这是因为会先进行取证运算
+        * 0到-1之间的小数，取整后等同于-0，repeat视同为0.
+        */
+        {
+            'na'.repeat(-0.9);
+        }
+        // 参数NaN等同于0.
+        {
+            console.log('na'.repeat(NaN));
+        }
+        // 如果repeat的参数是字符串，则会先转换成数字。
+        {
+            console.log('na'.repeat('na'));
+            console.log('na'.repeat('3'));
+        }
+    </script>
+
+    <script>
+        /**
+        * 9、padStart() padEnd()
+        * ES7引入了字符串补全长度的功能，如果某个字符串不够指定长度，，会在头部或尾部
+        * 补全。padStart()用于头部不补全，padEnd()用于尾部补全。
+        */
+        {
+            console.log('x'.padStart(5,'ab'));
+            console.log('x'.padStart(4,'ab'));
+
+            console.log('x'.padEnd(5,'ab'));
+            console.log('x'.padEnd(4,'ab'));
+        }
+        /**
+        * 上面代码中，padStart和padEnd一共接收两个参数，第一个参数用来指定字符串的最小长度
+        * 第二个参数是用来补全的字符串。
+        *
+        * 如果原字符串的长度，等于或大于指定的最小长度，则返回原字符串。
+        */
+        {
+            console.log('xxx'.padStart(2,'ab'));
+            console.log('xxx'.padEnd(2,'ab'));
+        }
+        /**
+        * 如果用来补全的字符串与原字符串，两者的长度之和超过了指定的最小长度，则会
+        * 截取超过位数的补全字符串
+        */
+        {
+            console.log('abc'.padStart(10,'0123456789'));
+        }
+        // 
     </script>
 </body>
 </html>
