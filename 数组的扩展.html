@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>111</div>
+    <div>222</div>
+    <div>333</div>
+    <script>
+        /**
+         * 1、 扩展运算符 
+         * 含义：
+         *      扩展运算符(spread)是三个点（...）.它好比rest参数的逆运算，将一个
+         * 数组转为用逗号分隔的参数列。
+         */    
+        {
+            console.log(...[1,2,3]); // 1  2  3
+
+            console.log(1,...[2,3,4],5)  // 
+
+            console.log(...document.querySelectorAll('div'));
+        }
+        // 该运算符主要用于函数调用
+        {
+            function push(array,...items) {
+                array.push(...items);
+            }
+            function add(x,y) {
+                return x + y;
+            }
+            const numbers = [4,38];
+            console.log(add(...numbers));
+
+        }
+        /**
+         * 上面代码中，array.push(...items)和add(...numbers)这两行，都是函数调用
+         * 他们的都使用了扩展运算符，该运算符将一个数组，变为参数序列。
+         * 
+         * 扩展运算符与正常的函数参数可以结合使用，非常灵活。
+        */
+        {
+            function f(v,w,x,y,z) {
+                return v+w+x+y+z;
+            }
+            const args = [0,1];
+            console.log(f(-1,...args,2,...[3]));
+        }
+        // 扩展运算符后面还可以放置表达式
+        {
+            let x = 1;
+            const arr = [...(x>0? ['a']: []),'b'];
+            console.log(arr);
+        }
+        // 如果扩展运算符后面是一个空数组，则不产生任何效果。
+        {
+            console.log([...[],1]);
+        }
+        /**
+         * 替代函数的apply方法
+         * 由于扩展运算符可以展开数组，所以不再需要apply方法，将数组转为函数的
+         * 参数了
+        */
+       {
+            // ES5写法
+            function f(x,y,z) {
+
+            }
+            var args = [0,1,2];
+            f.apply(null,args);
+
+            function f1(a,b,c) {
+
+            }
+            let arg = [1,2,3];
+            f1(...args);
+       }
+       /**
+        * 下面是扩展运算符取代apply方法的一个实际的例子，应用Math,max方法，简化求出
+        * 一个数组最大元素的写法
+       */
+      {
+          // ES5的写法
+          Math.max.apply(null,[3,6,8,1]);
+          // ES6的写法
+          Math.max(...[3,6,8,1]);
+          // 等同于
+          Math.max(14,3,77);
+      }
+      /**
+       * 上面代码中，由于javaScript不提供求数组最大元素的函数，所以只能套用Math.max
+       * 函数，将数组转为一个参数序列，然后求最大值，有了扩展运算符以后，就可以直接
+       * 使用Math.max了
+      */
+     {
+         //ES5的写法
+         let arr1 = [0,1,2];
+         let arr2 = [3,4,5];
+         Array.prototype.push.apply(arr1,arr2);
+         console.log(arr1,arr2);
+
+         // ES6的写法
+         let arr3 = [5,6,7];
+         let arr4 = [6,7,8];
+         arr3.push(...arr4);
+         console.log(arr3,arr4);
+     }
+     /**
+      * 上面代码的ES5写法中，push方法的参数不能是数组，所以只能通过apply方法
+      * 变通使用push方法。有了扩展运算符，就可以直接将数组传入push方法。
+      * 
+      * 下面是另外一个例子
+     */
+    {
+        // ES5
+        new (Date.bind.apply(Date,[null,2015,1,1]))
+        // ES6
+        new Date(...[2015,1,1]);
+    }
+    /**
+     * 扩展运算符的应用
+     * （1）复制数组
+     * 数组是复合数据类型，直接复制的话，只是复制了指向底层数据结构的指针，而不是克隆
+     * 一个全新的数组。
+    */
+   {
+       const a1 = [1,2];
+       const a2 = a1;
+
+       a2[0] = 2;
+       console.log(a1); // [2,2]
+   }
+   /**
+    * 上面代码中，a2并不是a1的克隆，而是指向同一份数据的另一个指针。修改a2,会
+    * 直接导致a1的变化。
+    * 
+    * ES5只能变通方法来复制数组。
+   */
+  {
+      const a1 = [1,2];
+      const a2 = a1.concat();
+
+      a2[0] = 2;
+      console.log(a1);   // [1,2];
+  }
+  /**
+   * 上面代码中，a1会返回原数组的克隆，在修改a2就不会对a1产生影响。
+   * 
+   * 扩展运算符提供了复制数组简便写法。
+  */
+    </script>
+</body>
+</html>
