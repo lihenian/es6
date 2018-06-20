@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script type="text/javascript" src = "./js/jquery.js"></script>
     <title>Document</title>
 </head>
 <body>
@@ -313,35 +314,249 @@
 
     <script>
         /**
-        * 9、padStart() padEnd()
-        * ES7引入了字符串补全长度的功能，如果某个字符串不够指定长度，，会在头部或尾部
-        * 补全。padStart()用于头部不补全，padEnd()用于尾部补全。
+        * 9、padStart()、padEnd()
+        * ES2017引入了字符串补全长度的功能，如果某个字符串不够指定长度，会在头部
+        * 或尾部补全。padStart()用于头部补全，padEnd用于尾部补全。
         */
         {
-            console.log('x'.padStart(5,'ab'));
-            console.log('x'.padStart(4,'ab'));
+            console.log('x'.padStart(5,'ab')); // ababx
+            console.log('x'.padStart(4,'ab')); // abax
 
-            console.log('x'.padEnd(5,'ab'));
-            console.log('x'.padEnd(4,'ab'));
+            console.log('x'.padEnd(5,'ab'));   // xabab
+            console.log('x'.padEnd(4,'ab'));   // xaba
         }
         /**
-        * 上面代码中，padStart和padEnd一共接收两个参数，第一个参数用来指定字符串的最小长度
-        * 第二个参数是用来补全的字符串。
+        * 上面代码中，padStart和padEnd 一共接受两个参数，第一个用来指定字符串的
+        * 最小长度，第二个参数是用来补全的字符串。
         *
-        * 如果原字符串的长度，等于或大于指定的最小长度，则返回原字符串。
+        * 如果原字符串的长度，等于或大于指定的最小长度，，则返回原字符串。
         */
         {
-            console.log('xxx'.padStart(2,'ab'));
-            console.log('xxx'.padEnd(2,'ab'));
+            console.log('xxx'.padStart(2,'ab'));  // xxx
+            console.log('xxx'.padEnd(2,'ab'));   // xxx
         }
         /**
         * 如果用来补全的字符串与原字符串，两者的长度之和超过了指定的最小长度，则会
-        * 截取超过位数的补全字符串
+        * 截去超过位数的补全字符串。
         */
         {
-            console.log('abc'.padStart(10,'0123456789'));
+            console.log('abc'.padStart(10,'0123456789')) // 0123456abc
         }
-        // 
+        // 如果省略第二个参数，默认使用空格补全长度。
+        {
+            console.log('x'.padStart(5));
+            console.log('x'.padEnd(5));
+        }
+        // padStart的常见用途是为数值补全指定位数。下面代码生成10位的数值字符串
+        {
+            console.log('1'.padStart(10,'0'));
+            console.log('12'.padStart(10,'0'));
+            console.log('123456'.padStart(10,'0'));
+        }
+        // 另一个用途是提示字符串的格式
+        {
+            console.log("12".padStart(10,'YYYY-MM-DD'));
+            console.log("09-12".padStart(10,'YYYY-MM-DD'));
+        }
+    </script>
+
+    <script>
+        /**
+        * 10、 matchAll()
+        * matchAll()方法返回一个正则表达式在当前字符串的所有匹配，详见
+        * 正则的扩展一章。
+        */
+    </script>  
+    <div id ="result"></div>
+    <div id="list"></div>
+    <div id = "table"></div>
+    <script>
+        /**
+        * 11、 模板字符串
+        * 传统的 JavaScript语言，输出模板通常是这么写的
+        */
+        {
+            var oDiv = document.getElementById('result');
+            let basket = {
+                count:12,
+                obsale: 2
+            }
+            oDiv.append(
+                'There are <b>' + basket.count + '</b>' + 
+                'items in your basket,' + 
+                '<em>' + basket.obsale + '</em>' + 'are on sale'
+            )
+        }
+        /**
+        * 上面这种写法相当繁琐不方便，ES6引入了模板字符串解决这个问题
+        */
+        {
+            let basket = {
+                count:12,
+                obsale: 2
+            }
+            oDiv.append(`
+                There are <b>${basket.count}</b>
+                items in your basket,<em>${basket.obsale}</em>
+                are on sale!
+            `)
+        }
+        /**
+        * 模板字符串是增强版的字符串，用反引号（`）标识，他可以当做普通字符串使用
+        * 也可以用来定义多行字符串，或者在字符串中嵌入变量。
+        */
+        {
+            // 普通字符串
+            console.log(`In JavaScript '\n' is a line-feed`);
+            
+            // 多行字符串
+            console.log(`in JavaScript this is 
+            not legal`);
+            
+            console.log(`string text line 1 
+            string text line 2`);
+
+            // 字符串中嵌入变量
+            let name = 'Bob', time = 'today';
+            console.log(`Hello ${name},how are you ${time}?`)
+        }
+        /**
+        * 上面代码中的模板字符串，都是用反引号表示，如果在模板字符串中需要使用
+        * 反引号，则前面要用反斜杠转移
+        */
+        {
+            let greeeting = `\`Yo\`World!`;
+            console.log(greeeting);
+        }
+        /**
+         * 如果使用模板字符串表示表示多行字符串，所有的空格和缩进都会被保留在、
+         * 输出之中
+        */
+       {
+           $("#list").html(`
+           <ul>
+             <li>first</li>
+             <li>second</li>
+            </ul>
+           `)
+       }
+       /**
+        * 上面代码中，所有模板字符串的空格和换行，都是被保留的，比如ul标签前面的
+        * 会有一个换行，如果你不想要这个换行，可以使用trim方法消除它。
+       */
+      {
+        $('#list').html(`
+            <ul>
+                <li>first</li>
+                <li>second</li>
+            </ul>
+        `.trim());
+      }
+      // 模板字符串中嵌入变量，需要将变量名写在${}中
+      {
+          let user = {
+              name: 'lihenian',
+              age: 23
+          }
+          let action = 'doSomething';
+          console.log(`
+          User ${user.name} is not authorized to do ${action}.
+          `)
+      }
+      /**
+       * 大括号内部可以放入任意的JavaScript表达式，可以进行运算，以及引入对象属性
+      */
+     {
+         let {x:a,y:b} = {x:1,y:2};
+         
+         console.log(`
+          ${a} + ${b} = ${a+b}
+         `)
+        
+         console.log(`
+          ${a} + ${b*2} = ${a + b * 2}
+         `)
+
+         let obj = {x:1,y:2};
+         console.log(`
+            ${obj.x + obj.y}
+         `)
+     }
+        // 模板字符串之中还能调用函数
+        {
+            function fn() {
+                return 'Hello World';
+            }
+            console.log(`
+                foo ${fn()} bar
+            `)
+        }
+        /**
+         * 如果大括号中的值不是字符串，将按照一般规则转为字符串，比如，大括号中
+         * 是一个对象，将默认调用对象的toString方法
+         * 
+         * 如果模板字符串中的变量没有声明，将报错。
+        */
+       {
+          // let msg = `Hello ${space}`; referenceError
+       }
+       /**
+        * 由于模板字符串的大括号内部，就是执行javaScript代码，因此，如果大括号内部
+        * 是一个字符串，将会原样输出
+        * 
+       */
+      {
+          console.log(`Hello ${'world'}`)
+      }
+      /**
+       * 模板字符串甚至还能嵌套
+       * 上面代码中，模板字符串的变量之中，又嵌套了另一个模板字符串，使用方法如下。
+      */
+     {
+         const tmpl = addrs => `
+         <table>
+            ${addrs.map(addr => `
+                <tr>
+                    <td>${addr.first}</td>
+                    <td>${addr.last}</td>
+                </tr>
+                `).join('')}
+         `;
+         const data = [
+             {first:'jane',last:'Bond'},
+             {first: 'Lars',last:'Crofts'}
+         ]
+         $("#table").html(tmpl(data));
+     }
+    </script>
+
+    <div id = "template"></div>
+    <script>
+        /**
+         * 12、实例：模板编译
+         * 下面，我们来看一个通过模板字符串，生成正式模板的实例。
+        */
+       {    
+           let data = {
+               supplies:[1,2,3,4,5,6,7,8,9]
+           };
+           let template = `
+           <ul>
+            <% for(let i =0; i < data.supplies.length; i ++) {%>
+                <li><%= data.supplies[i]%></li>
+            <%}%>
+           </ul>
+           `;
+           $("#template").html(template);
+       }
+       /**
+        * 上面代码在模板字符串之中，放置了一个常规模板，该模板使用<% %>放置
+        * JavaScript代码，使用<%= %>输出javascript表达式
+        * 
+        * 怎么编译这个模板字符串呢？
+        * 
+        * 一种思路是将其转换为JavaScript表达式字符串。
+       */
     </script>
 </body>
 </html>
