@@ -319,6 +319,14 @@
     }
     </script>
 
+    <span class = "name">1111</span>
+    <span class = "name">2222</span>
+    <span class = "name">3333</span>
+    <span class = "name">4444</span>
+    <span class = "name">5555</span>
+    <span>6666</span>
+    <span>7777</span>
+    <span>8888</span>
     <script>
         /**
         * 2、Array.from()
@@ -383,6 +391,66 @@
         {
             console.log(Array.from([1,2,3]))
         }
+        /**
+        * 值得提醒得是，扩展运算符（...）也可以将某些数据结构转为数组。
+        */
+        {
+            // arguments对象
+            function foo() {
+                const args = [...arguments];
+            }
+
+            // NodeList对象
+            [...document.querySelectorAll('div')]
+        }
+        /**
+         * 扩展运算符背后调用的是遍历器接口，如果一个对象没有部署这个接口，就无法
+         * 转换。Array.from方法还支持类似数组的对象。所谓类似数组的对象，本质特征
+         * 只有一个，即必须有length属性，因此，任何有length属性的对象，都可以通过
+         * Array.from方法转为数组，而此时扩展运算符就无法转换。
+        */
+       {
+           console.log(Array.from({length:3}));
+       }
+       /**
+        * 上面代码中，Array.from返回了一个具有三个成员的数组，每个位置都是undefined
+        * 扩展运算符转换不了这个对象。
+        * 
+        * 对于还没有部署该方法的浏览器，可以用Array.prototype.slice方法代替。
+       */
+      {
+          const toArray = (() => {
+              Array.from ? Array.from : obj => [].slice.call(obj)
+          })
+      }
+      /**
+       * Array.from 还可以接受第二个参数，作用类似于数组的map方法，用来对每个
+       * 元素进行处理，将处理后的值放入返回的数组。
+      */
+     {
+         let arrayLike = {
+             0: 1,
+             1: 4,
+             2: 6,
+             length: 3
+         }
+         console.log(Array.from(arrayLike,item => item * item));
+         console.log(Array.from(arrayLike).map(item => item * item));
+         console.log(Array.from([1,2,3],item => item * item));
+     }
+     /**
+      * 下面的例子是取出一组DOM节点的文本内容。
+     */
+    {
+        let spans = document.querySelectorAll("span.name");
+
+        // Array.from()
+        let names = Array.from(spans,s => s.textContent);
+        console.log(names);
+
+        let names1 = [...spans].map(item => item.textContent);
+        console.log(names1);
+    }
     </script>
 </body>
 </html>
