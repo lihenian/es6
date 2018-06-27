@@ -170,7 +170,7 @@
         */
        {
            console.log(Number.EPSILON === Math.pow(2,-52));
-           console.log(Number.EPSILON);
+           console.log(Number.EPSILON,'EPSILON');
            console.log(Number.EPSILON.toFixed(20));
        }
        /**
@@ -185,7 +185,258 @@
            console.log((0.1+ 0.2 - 0.3).toFixed(20));
 
            // 上面代码解释了，为什么比较 0.1 + 0.2 与 0.3的道德结果是false
+           console.log(0.1 + 0.2 === 0.3);
        }
+       /**
+        * Number.EPSILON可以用来设置能够接受的误差范围，比如，误差范围设为2 的
+        * -50次方，(即 Number.EPSILON * Math.pow(2,2)),即如果两个浮点数的差小于这个值，
+        * 我们就认为这两个浮点数相等.
+       */
+      {
+          console.log(5.551115123125783e-17 < Number.EPSILON * Math.pow(2, 2))
+      }
+      // 因此，Number.EPSILON的实质是一个可以接受的最小误差范围。
+      {
+          function withErrorMargin (left,right) {
+              return Math.abs(left - right) < Number.EPSILON * Math.pow(2,2);
+          }
+
+          console.log(0.1 + 0.2 === 0.3);
+          console.log(withErrorMargin(0.1+0.2,0.3));
+      }
+      // 上面的代码为浮点数运算，部署了一个误差检查函数
+    </script>
+
+    <script>
+        /**
+         * 6、安全整数和 Number.isSafeInteger()
+         * javascript能够准确表示的整数范围在-2^53 ~ 2^53之间，超过这个范围，无法精确到表示这个值
+        */
+       {
+           console.log(Math.pow(2,53)); // 9007199254740992
+           console.log(9007199254740992);
+           console.log(9007199254740993)
+
+           console.log(Math.pow(2,53) === Math.pow(2,53) + 1);
+       }
+       /**
+        * 上面代码中，超过2的53次方之后，一个数就不精确了
+        * 
+        * ES6引入了Number.MAX_SAFE_INTEGER 和 Number.MIN_SAFE_INTEGER这两个常量
+        * 用来表示这个范围的上下限。
+       */
+      {
+          console.log(Number.MAX_SAFE_INTEGER === Math.pow(2,53) -1);
+
+          console.log(Number.MAX_SAFE_INTEGER === 9007199254740991);
+
+          console.log(Number.MIN_SAFE_INTEGER === -Number.MAX_SAFE_INTEGER);
+
+          console.log(Number.MIN_SAFE_INTEGER === -9007199254740991)
+      }
+      /**
+       * 上面代码中，可以看到JavaScript能够精确地表示的极限
+       * 
+       * Number.isSafeInteger()则用来判断一个整数是否落在这个范围之内。
+      */
+     {
+         console.log(Number.isSafeInteger('a'));
+         console.log(Number.isSafeInteger(null));
+         console.log(Number.isSafeInteger(NaN));
+         console.log(Number.isSafeInteger(Infinity));
+         console.log(Number.isSafeInteger(-Infinity));
+
+         console.log(Number.isSafeInteger(3));
+         console.log(Number.isSafeInteger(1.2));
+         console.log(Number.isSafeInteger(9007199254740991));
+         console.log(Number.isSafeInteger(9007199254740992));
+
+         console.log(Number.isSafeInteger(Number.MAX_SAFE_INTEGER));
+         console.log(Number.isSafeInteger(Number.MIN_SAFE_INTEGER));
+         console.log(Number.isSafeInteger(Number.MAX_SAFE_INTEGER + 1));
+         console.log(Number.isSafeInteger(Number.MIN_SAFE_INTEGER -1));
+     }
+     // 这个函数的实现很简单，就是跟安全整数的两个边界值比较一下。
+     {
+         Number.isSafeInteger = function (n) {
+             return typeof n === 'number' && Math.round(n) === n && Number.MIN_SAFE_INTEGER <= n && Number.MAX_SAFE_INTEGER >= n;
+         }
+     }
+     /**
+      * 实际使用这个函数时，需要注意。验证运算结果是否落在安全整数范围内，不要只运算
+      * 结果，而要同时验证参与运算的每个值。
+     */
+    {
+        console.log(Number.isSafeInteger(9007199254740992));
+        // false
+        console.log(Number.isSafeInteger(900));
+        //true
+        console.log((9007199254740993 - 900));
+        // 返回结果： 9007199254740092   正确结果： 9007199254740093
+    }
+    /**
+     * 上面代码中，9007199254740093不是一个安全整数，但是Number.isSafeInteger
+     * 会返回结果，显示计算结果是安全的，这是因为，这个数超出了精度范围，导致在计算机
+     * 内部，以9007199254740092的形式存储
+    */
+   {
+    function trusty (left, right, result) {
+    if (
+        Number.isSafeInteger(left) &&
+        Number.isSafeInteger(right) &&
+        Number.isSafeInteger(result)
+    ) {
+        return result;
+    }
+        throw new RangeError('Operation cannot be trusted!');
+    }
+
+  // trusty(9007199254740993, 990, 9007199254740993 - 990)
+    // RangeError: Operation cannot be trusted!
+
+    trusty(1, 2, 3)
+    // 3
+    }
+    /**
+     * 所以，如果只验证运算结果是否为安全整数，很可能得到错误结果，下面的函数
+     * 可以同时验证两个运算数和运算结果。
+    */
+    </script>
+
+    <script>
+        /**
+         * 7、Math对象的扩展
+         * ES6在Math对象上新增了17个与数学相关的方法。所有这些方法都是静态方法，
+         * 只能在Math对象上调用。
+         * 
+         * Math.trunc()
+         * Math.trunc()方法用于去除一个数的小数部分，返回整数部分。
+        */
+       {
+           console.log(Math.trunc(4.1));
+           console.log(Math.trunc(4.9));
+           console.log(Math.trunc(-4.1));
+           console.log(Math.trunc(-4.9));
+           console.log(Math.trunc(-0.1234));
+       }
+       /**
+        * 对于非数值，Math.trunc内部使用Number方法将其先转为数值
+       */
+       {
+           console.log(Math.trunc('123.456'));
+           console.log(Math.trunc(true));
+           console.log(Math.trunc(false));
+           console.log(Math.trunc(null));
+       }
+       /**
+        * 对于空值和无法截取整数的值，返回NaN;
+       */
+       {
+           console.log(Math.trunc(NaN));
+           console.log(Math.trunc('foo'));
+           console.log(Math.trunc());
+           console.log(Math.trunc(undefined));
+       }
+       // 对于没有部署这个方法环境，可以用下面代码模拟
+       Math.trunc = Math.trunc || function (x) {
+           return x < 0 ? Math.ceil(x) : Math.floor(x);
+       }
+       /**
+        * Math.sigin()
+        * Math.sign 方法用来判断一个数到底是正数、负数、还是零。对于非数值，会先将
+        * 其转换为数值。
+        *   他会返回五种值。
+        *       - 参数为正数，返回 +1，
+        *       - 参数为负数，返回 -1，
+        *       - 参数为0，   返回0，
+        *       - 参数为-0，  返回-0，
+        *       - 其他值，    返回NaN
+       */
+       {
+           console.log(Math.sign(5));
+           console.log(Math.sign(-5));
+           console.log(Math.sign(0));
+           console.log(Math.sign(-0));
+           console.log(Math.sign(NaN));
+       }
+       // 如果参数是非数值，会自动转为数值，对于那些无法转为数值的值，会返回NaN
+       {
+           console.log(Math.sign(''));
+           console.log(Math.sign(true));
+           console.log(Math.sign(false));
+           console.log(Math.sign(null));
+           console.log(Math.sign('9'));
+           console.log(Math.sign('foo'));
+           console.log(Math.sign());
+           console.log(Math.sign(undefined));
+       }
+       /**
+        * Math.cbrt()
+        * Math.cbrt方法用于计算一个数的立方根
+       */
+       {
+           console.log(Math.cbrt(-1));
+           console.log(Math.cbrt(1));
+           console.log(Math.cbrt(0));
+           console.log(Math.cbrt(2));
+       }
+       // 对于非数值，Math.cbrt方法内部也是先使用Number方法将其转为数值
+       {
+           console.log(Math.cbrt('8'));
+           console.log(Math.cbrt('hello'));
+       }
+       // 对于没有部署这个方法的环境，可以使用下面的代码模拟
+       {
+           Math.cbrt = Math.cbrt || function(x) {
+               let y = Math.pow(Math.abs(x),1/3);
+               return x < 0 ? -y : y;
+           }
+       }
+       /**
+        * Math.clz32()
+        * JavaScript的整数使用32位二进制形式表示，Math.clz32方法返回一个数的32
+        * 位无符号整数形式有多少个前导0.
+       */
+      {
+          Math.clz32(0);
+          Math.clz32(1);
+          Math.clz32(1000);
+          Math.clz32(0b01000000000000000000000000000000);
+          Math.clz32(0b00100000000000000000000000000000);
+      }
+      /**
+       * 上面代码中，0的二进制形式全是0，所以有32个前导0；1的二进制形式是0b1
+       * 只占一位，所以32位之中有31个前导0,1000的二进制形式是0b11111101000,
+       * 一共有10位，所以32位之中有22个前导0.
+       * 
+       * clz32这个函数名来自'count leading zero bits in 32-bit binary 
+       * representation of a number'(计算一个数的32位二进制形式的前导0的个数)的缩写
+       * 
+       * 左移运算符(<<) 与Math.clz32方法直接相关
+    */
+      {
+          console.log(Math.clz32(0));
+          console.log(Math.clz32(1));
+          console.log(Math.clz32(1 << 1));
+          console.log(Math.clz32(1 << 2));
+          console.log(Math.clz32(1 << 29));
+      }
+      // 对于小数，Math.clz32方法只考虑整数部分
+      {
+          console.log(Math.clz32(3.2));
+          console.log(Math.clz32(3.9));
+      }
+      // 对于空值或其他类型的值，Math.clz32方法会将他们先转为数值，然后计算
+      {
+          console.log(Math.clz32());
+          console.log(Math.clz32(NaN));
+          console.log(Math.clz32(Infinity));
+          console.log(Math.clz32(null));
+          console.log(Math.clz32('foo'));
+          console.log(Math.clz32([]));
+          console.log(Math.clz32({}));
+          console.log(Math.clz32(true));
+      }
     </script>
 </body>
 </html>
