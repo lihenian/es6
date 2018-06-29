@@ -437,6 +437,196 @@
           console.log(Math.clz32({}));
           console.log(Math.clz32(true));
       }
+       /**
+       * Math.imul()
+       * Math.imul方法返回两个数以32位带符号整数形式相乘的结果，返回的也是一个32
+       *位的带符号整数。
+       */
+       {
+           console.log(Math.imul(2,4));
+           console.log(Math.imul(-1,8));
+           console.log(Math.imul(-2,-2));
+       }
+       /**
+       * 如果只考虑最后32位，大多数情况下，Math.imul(a,b)与a * b 的结果是相同的，即该方法
+       * 等同于（a * b）| 0的效果(超过32位的部分溢出)。之所以需要部署这个方法，是因为Javascript
+       * 有精度限制，超过2的53次方的值无法精确显示，这就是说，对于那些很大的数的乘法，低位数往往
+       *都是不精确的。Math.imul方法可以返回正确的低位数值
+       */
+       {
+        console.log((0x7fffffff * 0x7fffffff)|0);
+       }
+       /**
+       * 上面这个乘法算式，返回结果为0，但是由于这两个二进制的最低位都是1，所以这个
+       *结果肯定是不正确的，因为根据二进制乘法，计算结果的二进制最低位应该也是1，这个错误
+       * 就是因为他们的乘积超过了2的53次方，Javascript无法保存额外的精度，就把低位的值都变成
+       * 0，Math.imul方法可以返回正确的值1.
+       */
+       {
+           console.log(Math.imul((0x7fffffff * 0x7fffffff)|0));
+       }
+       /**
+       * Math.fround()
+       * Math.fround() 方法返回一个数的32位单精度浮点数形式。
+       * 对于32位单精度格式来说，数值精度是24个二进制位(1位隐藏位与23位有效位)，所以对于
+       *  -2^24至2^24之间的整数(不含两个端点)，返回结果与参数本身一致。
+       */
+       {
+           console.log(Math.fround(0));
+           console.log(Math.fround(1));
+           console.log(Math.fround(2 ** 24 -1))
+
+           // 如果参数的绝对值大于2^24，返回结果变开始丢失精度。
+           console.log(Math.fround(2 ** 24));
+           console.log(Math.fround(2 ** 24 -1));
+       }
+       /**
+       * Math.fround方法的主要作用，是将64位双精度浮点型转为32位单精度浮点型，如果小数
+       * 的精度超过24个二进制位，返回的值就会不同于原值，否则返回值不变（即与64双精度值一致）
+       */
+       {
+           // 未丢失有效精度
+           console.log(Math.fround(1.125));
+           console.log(Math.fround(7.25));
+
+           // 丢失精度
+           console.log(Math.fround(0.3));
+           console.log(Math.fround(0.7));
+           console.log(Math.fround(1.000000123));
+       }
+       /**
+       * 对于 NaN  和 Infinity ,此方法返回原值，对于其他类型的非数值，Math.fround
+       * 方法会现将其转为数值，再返回单精度浮点数。
+       */
+       {
+           Math.fround(NaN);
+           Math.fround(Infinity);
+           Math.fround('5');
+           Math.fround(true);
+           Math.fround(null);
+           Math.fround([]);
+           Math.fround({});
+       }
+       /**
+       * Math.hypot()
+       * Math.hypot方法返回所有参宿的平方和
+       */
+       {
+           console.log(Math.hypot(3,4));
+           console.log(Math.hypot(3,4,5));
+           console.log(Math.hypot());
+           console.log(Math.hypot(NaN));
+           console.log(Math.hypot(3,4,'foo'));
+           console.log(Math.hypot(3,4,'5'));
+           console.log(Math.hypot(-3));
+       }
+       /**
+       * 上面代码中，3的平方加上4的平方，等于5的平方
+       *
+       * 如果参数不是数值，Math.hypot()方法会将其转为数值，只要有一个参数无法转为
+       * 数值，就会返回NaN.
+       */
+    </script>
+
+    <script>
+        /**
+        * 对数方法
+        * ES6新增了4个对数相关方法
+        * （1） Math.expm1()
+        * Math.expm1(x) 返回 e^x -1,即Math.exp(x) - 1
+        */
+        {
+            console.log(Math.expm1(-1));
+            console.log(Math.expm1(0));
+            console.log(Math.expm1(1));
+        }
+        // 对于没有部署这个方法的环境，可以使用下面的代码模拟
+        {
+            Math.expm1 = Math.expm1 || function(x) {
+                return Math.exp(x) -1;
+            }
+        }
+        /**
+        * (2) Math.log1p()
+        * Math.log1p(x)方法返回1 + x 的自然对数，即Math.log(1+x).如果x小于-1
+        * 返回NaN
+        */
+        {
+            console.log(Math.log1p(1));
+            console.log(Math.log1p(0));
+            console.log(Math.log1p(-1));
+            console.log(Math.log1p(-2));
+        }
+        // 对于没有部署这个方法的环境，可以使用下面的代码模拟
+        {
+            Math.log1p = Math.log1p || function(x) {
+                return Math.log(1+x);
+            }
+        }
+        /**
+        * (3) Math.log10()
+        * Math.log10(x) 返回以10为底的x的对数，如果x小于0，则返回NaN;
+        */
+        {
+            console.log(Math.log10(2));
+            console.log(Math.log10(1));
+            console.log(Math.log10(0));
+            console.log(Math.log10(-1));
+            console.log(Math.log10(100000));
+        }
+        // 对于没有部署这个方法的环境，可以使用下面的代码模拟
+        {
+            Math.log10 = Math.log10 || function (x) {
+                return Math.log(x) / Math.LN10;
+            }
+        }
+        /**
+        * (4)Math.log2()
+        * Math.log2(x)返回以2为底的x的对数，如果x小于0，则返回NaN;
+        */
+        {
+            console.log(Math.log2(3));
+            console.log(Math.log2(2));
+            console.log(Math.log2(1));
+            console.log(Math.log2(0));
+            console.log(Math.log2(-2));
+            console.log(Math.log2(1024));
+            console.log(Math.log2(1 << 29));
+        }
+        // 对于没有部署这个方法的环境，可以用下面的代码模拟
+        {
+            Math.log2 = Math.log2 || function (x) {
+                return Math.log(x) / Math.LN2;
+            }
+        }
+    </script>
+
+    <script>
+        /**
+        * 8、指数运算符
+        * ES6新增了一个指数运算符(**)
+        */
+        {
+            console.log(2 ** 2);
+            console.log(2 ** 3);
+        }
+        // 指数运算符可以与等号结合，形成一个新的复制运算符（**=）
+        {
+            let a = 1.5;
+            a **= 2;
+
+            let b= 4;
+            b **= 3;
+            console.log(a,b);
+        }
+        /**
+        * 注意，在V8引擎中，指数运算，指数运算符与Math.pow的实现不同，对于特别大的运算结果
+        * 两者会有细微的差异。
+        */
+        {
+            console.log(Math.pow(99,99));
+            console.log(99 ** 99);
+        }
     </script>
 </body>
 </html>
