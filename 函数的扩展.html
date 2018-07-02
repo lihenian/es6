@@ -394,15 +394,144 @@
 
     <script>
         /**
-        *  应用
-        *  利用参数默认值，可以指定某一个参数不得省略，如果省略就抛出一个错误
+        * 应用
+        * 利用参数默认值，可以指定某一个参数不得省略，如果省略就抛出一个错误
         */
         {
             function throwIfMissing() {
                 throw new Error('Missing paramter');
             }
 
-            function foo()
+            function foo (mustBeProvided = throwIfMissing()) {
+                return mustBeProvided;
+            }
+
+            console.log(foo('aaa'));
+        }
+        /**
+        * 上面代码的foo函数，如果调用的时候没有参数，就会调用默认值throwIfMissing
+        * 从而抛出一个错误
+        *
+        * 从上面代码还可以看到，参数mustBeProvided的默认值等于throwIfMissing函数的
+        * 运行结果，这表明参数的默认值不是在定义时执行，而是在运行时执行，如果参数已经
+        * 赋值，默认值中的函数就不会运行
+        *
+        *另外，可以将参数默认值设为undefined,表明这个参数是可以省略的。
+        */
+        {
+            function foo(optional = undefined) { }
+        }
+    </script>
+
+    <script>
+        /**
+        * 2 rest参数
+        * ES6引入rest参数(形式为...变量名)，用于获取函数的多余参数，这样就不需要使用
+        * arguments对象，rest参数搭配的变量是一个数组，该变量将多余的参数放入数组中
+        */
+        {
+            function add(...values) {
+                let sum = 0;
+
+                for (let val of values) {
+                    sum += val;
+                }
+
+                return sum;
+            }
+
+            console.log(add(2,5,6));
+        }
+        /**
+        * 上面代码的add函数是一个求和函数，利用rest参数，可以向该函数传入任意数组的参数
+        *
+        * 下面是一个rest参数代替arguments变量的例子
+        */
+        {
+            // arguments变量的写法
+            function sortNumbers() {
+                return Array.prototype.slice.call(arguments).sort()
+            }
+
+            // rest参数的写法
+            const sortNumbers1 = (...numbers) => numbers.sort();
+        }
+        /**
+        * 上面代码的两种写法，比较后可以发现，rest参数的写法更自然也更简洁。
+        *
+        * arguments对象不是数组，而是一个类似数组的对象，所以为了使用数组的方法，必须
+        * 使用Array.prototype.slice.call先将其转为数组。rest参数就不存在这个问题，它
+        * 就是一个真正的数组，数组特有的方法都可以使用，下面是一个利用rest参数改写数组
+        * push方法的例子。
+        */
+        {
+            function push(array,...items) {
+                items.forEach(item => {
+                    array.push(item);
+                })
+
+                return array;
+            }
+
+            let a = [];
+
+            push(a,1,23,4,5,6);
+            console.log(a);
+        }
+        // 注意： rest参数之后不能再有其他参数（即只能是最后一个参数），否则会报错
+        {
+            //function f(a,...b,c) {} //Uncaught SyntaxError: Rest parameter must be last formal parameter
+        }
+        // 函数的length属性，不包括rest参数
+        {
+            console.log((function(a){}).length);
+            console.log((function(a,...c){}).length);
+            console.log((function(...b){}).length);
+
+        }
+    </script>
+
+    <script>
+        /**
+        * 3、严格模式
+        * 从ES5开始，函数内部可以设定为严格模式
+        */
+        {
+            function doSomething(a,b) {
+                'use strict'
+                // code
+            }
+        }
+        /**
+        * ES6做了一些修改，规定只要函数参数使用了默认值、解构赋值、或者扩展运算符
+        *那么函数内部就不能显式设定为严格模式，否则会报错。
+        */
+        {
+            // 报错
+            function doSomething(a,b=a) {
+                'use strict';
+            }
+
+            // 报错
+            const doSomething1 = function ({a:x,b:y}) {
+                'use strict';
+            }
+
+            // 报错
+            const doSomething2 = function (...a) {
+                'use strict';
+            }
+        }
+        /**
+        * 这样规定的原因是函数内部的严格模式，同时适用于函数体和函数参数，但是，
+        * 函数执行的时候，先执行函数参数，然后在执行函数体，这样就有一个不合理的地方
+        * 只有从函数体中，才能知道参数是否应该以严格模式执行，但是参数却应该先于函数体执行
+        */
+        {
+            // 报错
+            function doSomething(value = 070) {
+                'use strict'
+            }
         }
     </script>
 </body>
