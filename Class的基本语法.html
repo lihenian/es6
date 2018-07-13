@@ -302,6 +302,383 @@
             var p2 = new Point(3,2);
             console.log(p1.__proto__ === p2.__proto__); // true
         }
+        /**
+        * 上面代码中，p1和p2都是Point的实例，他们的原型都是Point.prototype,所以
+        * __proto__属性是相等的
+        * 
+        * 这也意味着，可以通过实例的__proto__属性为类添加方法
+        *
+        * __proto__并不是语言本身的特性，这是各大厂商具体实现时添加的私有属性
+        * 虽然目前很多浏览器的JS引擎中都提供了这个私有属性，但是依旧不建议在生产
+        * 中使用该属性，避免对环境产生依赖。生产环境中，我们可以使用Object.getPrototypeOf
+        * 方法获取实例对象的原型，然后再来为原型添加方法/属性
+        */
+       {
+            class Point {
+                constructor(x,y) {
+                    this.x = x;
+                    this.y = y;
+                }
+
+                toString() {
+                    return `${this.x},${this.y}`;
+                }
+            }
+            let p1 = new Point(2,3);
+            let p2 = new Point(3,2);
+
+            p1.__proto__.printName = function () {
+                return 'Oops';
+            }
+
+            console.log(p1.printName());
+            console.log(p2.printName());
+
+            let p3 = new Point(4,3);
+            console.log(p3.printName());
+       }
+       /**
+        * 上面代码在p1的原型上添加了一个printName方法，由于p1的原型就是p2的原型
+        * 因此，p2也可以调用这个方法。而且，此后建立的实例也可以调用这个方法，这意味着
+        * 使用实例的__proto__属性改写原型，必须相当谨慎，不推荐使用，因为这回改变类的
+        * 原始定义，影响到所有实例。
+       */
+    </script>
+
+    <script>
+        /**
+         * 5、Class表达式
+         * 与函数一样，类也可以使用表达式的形式定义。
+        */
+        {
+            const MyClass = class Me {
+                getClassName() {
+                    return Me.name;
+                }
+            }
+        }
+        /**
+         * 上面代码使用表达式定义了一个类，需要注意的是，这个类的名字是MyClass
+         * 而不是Me,Me只在class的内部可用，只带当前类
+         * 
+        */
+        {
+            const MyClass = class Me {
+                getClassName() {
+                    return Me.name;
+                }
+            }
+
+            let inst = new MyClass();
+            console.log(inst.getClassName());
+        }
+        /**
+         * 上面代码表示，Me只在Class内部有定义。
+         * 
+         * 如果类的内部没用到的话，可以省略Me,也就是可以写成下面的形式
+         * 
+         * const MyClass = class {....}
+         * 
+         * 采用Class表达式，可以写出立即执行的Class
+        */
+        {   
+            let person = new class {
+                constructor(name) {
+                    this.name = name;
+                }
+
+                sayName() {
+                    console.log(this.name);
+                }
+            }('张三');
+
+            person.sayName();
+        }
+    </script>
+
+    <script>
+        /**
+         * 6、不存在变量提升
+         * 类不存在变量提升，这一点与ES5完全不同
+        */
+       {
+         //  new Foo();
+           class Foo {}
+       }
+       /**
+        * 上面代码中，Foo类使用在前，定义在后，这样会报错，因为ES6不会把类的声明提升到
+        * 代码块的头部，这种规定的原因与下文要提到的继承有关，必须保证子类在父类之后定义。
+       */
+      {
+          let Foo = class {}
+          class Bar extends Foo {}
+      }
+      /**
+       * 上面代码不会报错，因为Bar继承Foo的时候，Foo已经有定义了。但是，如果存在
+       * class提升，上面代码就会报错，因为class会被提升到代码头部，而let命令是不提升的
+       * 所以导致Bar继承Foo的时候，Foo还没有定义。
+      */
+    </script>
+
+    <script>
+        /**
+         * 7、私有方法和私有属性
+         * 现有的方法
+         * 私有方法是常见的需求，但是ES6不提供，还能通过变通的方法模拟实现。
+         * 一种做法是在命名上加以区分
+        */
+        {
+            class Widget {
+                // 共有方法
+                foo (baz) {
+                    this._baz(baz);
+                }
+
+                // 私有方法
+                _baz(baz) {
+                    return this.snaf = baz;
+                }
+            }
+        }
+        /**
+         * 上面代码中，_baz方法前面的下划线，表示这是一个只限内部使用的私有方法
+         * 但是，这种命名是不保险的，在类的外部，还是可以调用到这个方法
+         * 
+         * 另一种方法就是索性将私有方法移出模块，因为模块内部的所有方法都是对外可见的
+        */
+        {
+            class Widget {
+                foo(baz) {
+                    baz.call(this,baz)
+                }
+            }
+            function bar(baz) {
+                return this.snaf = baz;
+            }
+        }
+        /**
+         * 上面代码中，foo是共有方法，内部调用了bar.call(this,baz).这使得bar实际上
+         * 成为了当前模块的私有方法
+         * 
+         * 还有一种方法是利用Symbol值的唯一性，将私有方法的名字命名为一个Symbol值
+         * 
+        */
+        {
+            const bar = Symbol('bar');
+            const snaf = Symbol('snaf');
+
+            class MyClass {
+                // 共有方法
+                foo(baz) {
+                    this[bar](baz);
+                }
+                // 私有方法
+                [bar](baz) {
+                    return this[snaf] = baz;
+                }
+            }
+        }
+        /**
+         * 上面代码中，bar和snaf都是Symbol值，导致第三方无法获取到他们，因此达到了
+         * 私有方法和私有属性的效果。
+        */
+        /***
+         * 私有属性的提案
+         * 与私有方法一样，ES6不支持私有属性，目前，有一个提案，为class加了私有属性
+         * 方法是在属性名前，使用#表示。
+        */
+        {
+            // class Point {
+            //     #x;
+            //     constructor(x=0) {
+            //         #x = +x; // 写成this.#x也可以
+            //     }
+
+            //     get x() {return #x}
+            //     set x(value) {#x = +value}
+            // }
+        }
+        /**
+         * 上面代码中，#x就是私有属性，在Point类之外是读取不到这个属性的。由于井号
+         * #是属性名的一部分，使用时必须带有#一起使用，所以#x和x是两个不同的属性
+         * 
+         * 私有属性可以指定初始值，在构造函数执行时进行初始化
+         * 
+        */
+        {
+            // class Point {
+            //     #x = 0;
+            //     constructor() {
+            //         console.log(#x);
+            //     }
+            // }
+        }
+        /***
+         * 之所以要引入一个新的前缀#表示私有属性，而没有采用private关键字，是因为
+         * js是一门动态语言，使用独立的符号似乎是唯一的可靠方法，能够准确的区分
+         * 一种属性是否为私有属性。另外，Ruby语言使用@表示私有属性，ES6没有用这个符号
+         * 而使用#，是因为@已经留给了Decorator.
+         * 
+         * 这种写法不仅可以写私有属性，还可以用来写私有方法
+        */
+        {
+            // class Foo {
+            //     #a;
+            //     #b;
+            //     #sum() { return #a + #b;}
+            //     printSum() {console.log(#sum());}
+            //     constructor(a,b) {#a = a; #b = b;}
+            // }
+        }
+        /**
+         * 上面代码中，#sum()就是一个私有方法
+         * 另外，私有属性也可以设置getter和setter方法
+        */
+        {
+            // class Counter {
+            //     #xValue = 0;
+
+            //     get #x() { return #xValue;}
+            //     set #x(value) { this.#xValue = value}
+            // }
+        }
+        /**
+         * 上面方法中，#x是一个私有属性，他的读写都通过get #x()和set #x()来完成
+        */
+    </script>
+
+    <script>
+        /**
+         * 8、this的指向
+         * 类的方法内部如果有this,他默认指向类的实例。但是，必须非常小心，一旦单独
+         * 用到该方法，很可能报错
+        */
+        {
+            class Logger {
+                printName(name = 'there') {
+                    this.print(`Hello ${name}`);
+                }
+
+                print(text) {
+                    console.log(text);
+                }
+            }
+
+            const logger = new Logger();
+            const { printName } = logger;
+            //printName();
+            logger.printName()
+        }
+        /**
+         * 上面代码中，printName方法中的this,默认指向Logger类的实例。但是，如果将
+         * 这个方法提取出来单独使用，this会指向该方法运行时所在的环境，因为找不到
+         * print方法而报错
+         * 
+         * 一个比较简单的解决方法是，在构造函数中绑定this,这样就不会找不到print方法了
+         * 
+        */
+            {
+                class Logger {
+                    constructor() {
+                        this.printName = this.printName.bind(this);
+                    }
+                    printName(name = "there") {
+                        this.print(`hello ${name}`)
+                    }
+
+                    print(text) {
+                        console.log(text);
+                    }
+                }
+
+                const logger = new Logger()
+
+                const { printName } = logger;
+                printName();
+            }
+            // 另一种解决方法是使用箭头函数
+            {
+                class Logger {
+                    constructor() {
+                        this.printName = (name="there") => {
+                            this.print(`hello ${name}`);
+                        }
+                    }
+           
+                    print(text) {
+                        console.log(text);
+                    }
+                }
+
+                 const logger = new Logger()
+
+                const { printName } = logger;
+                printName();
+            }
+    </script>
+
+    <script>
+        /**
+         * 9、name属性
+         * 由于本质上，ES6的类只是ES5的构造函数的一层包装，所以函数的许多特性都被Class
+         * 继承，包括name属性
+        */
+        {
+            class Point {}
+            console.log(Point.name);
+        }
+    </script>
+
+    <script>
+        /**
+         * Class的取值函数（getter）和存值函数(setter)
+         * 与ES5一样，在类的内部可以使用get和set关键字，对某个属性设置存值函数
+         * 和取值函数，拦截属性的存取行为
+        */
+        {
+            class MyClass {
+                constructor() {
+
+                }
+                get prop() {
+                    return ('getter');
+                }
+                set prop(value) {
+                    console.log('setter: ' + value);
+                }
+            }
+
+            let inst = new MyClass();
+
+            inst.prop = 123;
+
+            console.log(inst.prop);
+        }
+        /***
+         * 上面代码中，prop属性有对应的存值和取值桉树，因此赋值和读取行为都被自定义了
+         * 
+         * 存值函数和取值函数是设置在属性的Descriptor对象上
+        */
+        {
+            class CustomHTMLElement {
+                constructor(element) {
+                    this.element = element;
+                }
+
+                get html() {
+                    return this.element.innerHTML;
+                }
+
+                set html(value) {
+                    this.element.innerHTML = value;
+                }
+            }
+
+            let descriptor = Object.getOwnPropertyDescriptor(CustomHTMLElement.prototype,'html')
+
+            console.log('get' in descriptor);
+            console.log('set' in descriptor);
+        }
     </script>
 </body>
 </html>
